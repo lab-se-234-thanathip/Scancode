@@ -1,4 +1,4 @@
-name: DeepSource Test Coverage Analysis
+name: DeepSource Analysis
 
 on:
   push:
@@ -9,50 +9,30 @@ on:
       - main
 
 jobs:
-  test-coverage:
+  analyze:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code from the repository
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Set up the environment variables
-      - name: Set up DEEPSOURCE_DSN
-        run: echo "DEEPSOURCE_DSN=${{ secrets.DEEPSOURCE_DSN }}" >> $GITHUB_ENV
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
 
-      # Build the Docker image
-      - name: Build Docker image
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests and generate coverage report
         run: |
-          docker build -t my-docker-image .
-
-      # Run the container in detached mode
-      - name: Run Docker container
-        run: |
-          docker run --rm -d -p 8000:80 my-docker-image
-
-      # Wait for a few seconds to ensure the container is running
-      - name: Wait for server to start
-        run: sleep 5 # เพิ่มเวลารอให้ container ทำงาน
-
-      # Check if the container is running
-      - name: Verify Docker container is running
-        run: |
-          docker ps
-
-      # Generate the coverage report (ปรับตามวิธีทดสอบที่คุณใช้)
-      - name: Run custom tests and generate coverage report
-        run: |
-          curl http://localhost:8000/coverage-report > coverage.xml
-
-      # Install DeepSource CLI
-      - name: Install DeepSource CLI
-        run: |
-          curl -sSL https://deepsource.io/cli | sh
-
-      # Report the coverage artifact to DeepSource
-      - name: Report coverage to DeepSource
-        run: |
-          ./bin/deepsource report --analyzer test-coverage --key javascript --value-file coverage.xml
+          npm test -- --coverage
         env:
-          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
+          CI: true
+
+      - name: Upload coverage report to DeepSource
+        uses: deepsourcelabs/test-coverage-action@v1.1.2
+        with:
+          key: javascript
+          coverage-file: ./coverage/lcov.info
+          dsn: ${{ secrets.DEEPSOURCE_DSN }}
