@@ -26,7 +26,10 @@ jobs:
 
       - name: Run DeepSource analysis
         run: |
-          curl https://deepsource.io/cli | sh
-          ./bin/deepsource analyze
+          # Install DeepSource CLI
+          curl https://deepsource.com/cli | sh
+
+          # Run analysis
+          ./bin/deepsource report --analyzer=javascript --key=javascript --value-file=coverage.xml
         env:
           DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
