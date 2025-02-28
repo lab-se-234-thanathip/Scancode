@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  web:
+    image: thechef2546/234-deploylab-devop6:latest
+    ports:
+      - "8150:80"
