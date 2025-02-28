@@ -24,12 +24,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run DeepSource analysis
-        run: |
-          # Install DeepSource CLI
-          curl https://deepsource.com/cli | sh
+      - name: Run tests and generate coverage report
+        run: npm test -- --coverage
 
-          # Run analysis
-          ./bin/deepsource report --analyzer=javascript --key=javascript --value-file=coverage.xml
+      - name: Install DeepSource CLI
+        run: curl https://deepsource.io/cli | sh
+
+      - name: Report coverage to DeepSource
+        run: ./bin/deepsource report --analyzer=test-coverage --key=javascript --value-file=./coverage/coverage.xml
         env:
           DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
