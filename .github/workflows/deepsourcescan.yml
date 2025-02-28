@@ -1,4 +1,4 @@
-name: DeepSource Analysis
+name: DeepSource Scan
 
 on:
   push:
@@ -16,23 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Run DeepSource Analysis
+        uses: deepsourcelabs/deepsource-action@v1
         with:
-          node-version: '14'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests and generate coverage report
-        run: |
-          npm test -- --coverage
-        env:
-          CI: true
-
-      - name: Upload coverage report to DeepSource
-        uses: deepsourcelabs/test-coverage-action@v1.1.2
-        with:
-          key: javascript
-          coverage-file: ./coverage/lcov.info
           dsn: ${{ secrets.DEEPSOURCE_DSN }}
