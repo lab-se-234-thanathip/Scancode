@@ -1,23 +1,20 @@
-name: DeepSource Analysis
+name: Run tests and report coverage to DeepSource
 
 on:
   push:
     branches:
       - main
   pull_request:
-    branches:
-      - main
 
 jobs:
-  analyze:
+  test-and-report:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
           node-version: '14'
 
@@ -27,10 +24,9 @@ jobs:
       - name: Run tests and generate coverage report
         run: npm test -- --coverage
 
-      - name: Install DeepSource CLI
-        run: curl https://deepsource.io/cli | sh
-
-      - name: Report coverage to DeepSource
-        run: ./bin/deepsource report --analyzer=test-coverage --key=javascript --value-file=./coverage/coverage.xml
-        env:
-          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
+      - name: Upload coverage report
+        uses: deepsourcelabs/test-coverage-action@v1.1.2
+        with:
+          key: javascript
+          coverage-file: coverage/lcov.info
+          dsn: ${{ secrets.DEEPSOURCE_DSN }}
